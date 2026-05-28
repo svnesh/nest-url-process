@@ -1,0 +1,44 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  binaryTargets = ["native", "linux-musl-arm64-openssl-3.0.x", "linux-arm64-openssl-1.1.x"]
+  output   = "../src/generated/prisma"
+
+  runtime                = "nodejs"
+  moduleFormat           = "cjs"
+  generatedFileExtension = "ts"
+}
+
+enum URLJobStatus {
+  PENDING
+  PROCESSING
+  SUCCESS
+  FAILED
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model url_collection {
+  id          Int             @id @default(autoincrement())
+  url         String          @unique
+  type        String?       
+  status      URLJobStatus?   @default(PENDING)
+  error       String?
+  retryCount  Int?            @default(0)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  deletedAt   DateTime?
+}
+
+model processed_content {
+  id          Int         @id @default(autoincrement())
+  urlJobId    Int
+  contentType String
+  extracted   Json  
+}
