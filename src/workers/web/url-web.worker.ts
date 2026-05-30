@@ -75,12 +75,13 @@ export class URLWebWorker {
   }
 
   async retryFailedJob(data: KafkaUrlFeederDto) {
-    let kafkaDto = new KafkaUrlFeederDto();
-    kafkaDto.id = data.id;
-    kafkaDto.url = data.url;
-    kafkaDto.type = data.type ? data.type : 'web';
-    kafkaDto.retryCount = data.retryCount ? data.retryCount + 1 : 1;
-    kafkaDto.createdAt = data.createdAt;
+    let { retryCount, ...rest } = data;
+    retryCount = retryCount ? retryCount + 1 : 1;
+    const kafkaDto: KafkaUrlFeederDto = {
+      ...rest,
+      retryCount,
+      createdAt: new Date().toISOString(),
+    };
 
     if (data && data.retryCount < 3) {
       this.producer.emit(KAFKA_TOPICS.WEB_RETRY_TOPIC, {

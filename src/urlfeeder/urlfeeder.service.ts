@@ -1,4 +1,10 @@
-import { Inject, Injectable, OnModuleInit, Post } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  OnModuleInit,
+  Post,
+} from '@nestjs/common';
 import { PrismaService } from 'src/prisma.service';
 import { KafkaUrlFeederDto } from './dto/create-urlfeeder.dto';
 import { URL_TYPES } from 'src/shared/enum/enum';
@@ -22,14 +28,33 @@ export class UrlfeederService implements OnModuleInit {
     return resp;
   }
 
-  async addUrlToCollection(url: string, contentType: string): Promise<any> {
+  async addUrlToCollection(url: string): Promise<any> {
+    //Finding duplicate URL in collection
+    const existingEntry = await this.prismaService.url_collection.findUnique({
+      where: { url: url },
+    });
+    if (existingEntry) {
+      console.log(`URL already exists in collection: ${url}`);
+      return existingEntry;
+    }
+
+    let contentType: string | null = null;
+    try {
+      const response = await fetch(url, { method: 'HEAD' });
+      contentType = response ? response.headers.get('Content-Type') : null;
+    } catch (error) {
+      console.error(`Error fetching URL: ${url}`, error);
+      throw new BadRequestException(`Unable to fetch URL: ${url}`);
+    }
+    // Default to webpage if fetch fails
+
     //Find contentType is image or pdf or webpage
     let type = URL_TYPES.WEBPAGE;
     let topic = KAFKA_TOPICS.WEB_TOPIC;
-    if (contentType.includes('image')) {
+    if (contentType && contentType.includes('image')) {
       type = URL_TYPES.IMAGE;
       topic = KAFKA_TOPICS.IMAGE_TOPIC;
-    } else if (contentType.includes('pdf')) {
+    } else if (contentType && contentType.includes('pdf')) {
       type = URL_TYPES.PDF;
       topic = KAFKA_TOPICS.PDF_TOPIC;
     }
