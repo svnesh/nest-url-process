@@ -8,9 +8,13 @@ export async function downloadImage(url: string): Promise<string> {
   //get extension of the image from the url
   const extension = path.extname(url).split('?')[0] || '.jpg';
   try {
+    await fs.promises.mkdir(path.join(process.cwd(), '/src/assets/'), {
+      recursive: true,
+    });
+
     const destinationPath = path.join(
       process.cwd(),
-      '/assets/',
+      '/src/assets/',
       `${uniqueFilename}${extension}`,
     );
     const writer = fs.createWriteStream(destinationPath);
@@ -24,5 +28,3 @@ export async function downloadImage(url: string): Promise<string> {
     throw new Error(`Failed to download image from ${url}: ${error.message}`);
   }
 }
-
-export default downloadImage;

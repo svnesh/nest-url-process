@@ -48,7 +48,7 @@ export class ImageWorker {
           },
         });
 
-        const imagePath = await this.downloadImage(data.url);
+        const imagePath = await downloadImage(data.url);
         if (imagePath) {
           await this.prismaService.url_collection.update({
             where: { id: data.id },
