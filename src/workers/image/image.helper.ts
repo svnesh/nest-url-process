@@ -8,13 +8,13 @@ export async function downloadImage(url: string): Promise<string> {
   //get extension of the image from the url
   const extension = path.extname(url).split('?')[0] || '.jpg';
   try {
-    await fs.promises.mkdir(path.join(process.cwd(), '/src/assets/'), {
+    await fs.promises.mkdir(path.join(process.cwd(), '/storage/images/'), {
       recursive: true,
     });
 
     const destinationPath = path.join(
       process.cwd(),
-      '/src/assets/',
+      '/storage/images/',
       `${uniqueFilename}${extension}`,
     );
     const writer = fs.createWriteStream(destinationPath);

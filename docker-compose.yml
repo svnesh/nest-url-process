@@ -73,6 +73,7 @@ services:
     volumes:
       - .:/usr/src/app
       - /usr/src/app/node_modules
+      - ./storage:/usr/src/app/storage
     command: npm run start:dev
     networks:
       - prisma-network
